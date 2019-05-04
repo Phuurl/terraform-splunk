@@ -56,13 +56,16 @@ resource "digitalocean_firewall" "icm" {
   inbound_rule {
     protocol = "tcp"
     port_range = "22"
+    # Set to be accessible from your current external IP only - switch if this is expected to change
     source_addresses = ["${chomp(data.http.client_ip.body)}/32"]
     # source_addresses = ["0.0.0.0/0", "::/0"]
   }
   inbound_rule {
     protocol = "tcp"
     port_range = "8000"
+    # Set to be accessible from your current external IP only - switch if this is expected to change
     source_addresses = ["${chomp(data.http.client_ip.body)}/32"]
+    # source_addresses = ["0.0.0.0/0", "::/0"]
   }
   inbound_rule {
     protocol = "tcp"
@@ -110,7 +113,9 @@ resource "digitalocean_firewall" "idx" {
   inbound_rule {
     protocol = "tcp"
     port_range = "22"
+    # Set to be accessible from your current external IP only - switch if this is expected to change
     source_addresses = ["${chomp(data.http.client_ip.body)}/32"]
+    # source_addresses = ["0.0.0.0/0", "::/0"]
   }
   inbound_rule {
     protocol = "tcp"
