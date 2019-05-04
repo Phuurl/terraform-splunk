@@ -15,6 +15,7 @@ install:
   - wget 'https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip' -O terraform.zip
   - unzip terraform.zip
   - chmod +x ./terraform
+  - ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ""
 
 script:
   # index_cluster tests
