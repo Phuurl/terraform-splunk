@@ -1,0 +1,29 @@
+sudo: required
+language: python
+dist: xenial
+python: "3.7"
+
+# branches:
+#   only:
+#     - master
+
+env:
+  - ANSIBLE_VERSION=latest
+
+install:
+  - pip3 install ansible ansible-lint pycodestyle
+  - wget 'https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip' -O terraform.zip
+  - unzip terraform.zip
+  - chmod +x ./terraform
+  - ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ""
+
+script:
+  # index_cluster tests
+  - cd index_cluster
+  - cp terraform.tfvars.example terraform.tfvars
+  - ../terraform init
+  - ../terraform validate
+  - ansible-playbook -i "127.0.0.1," master.yml --syntax-check
+  - ansible-lint -x 301 master.yml
+  - python3 sites_string.py test
+  - pycodestyle .
