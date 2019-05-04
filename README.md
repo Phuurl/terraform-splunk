@@ -12,7 +12,7 @@ A Terraform plan to set up a Splunk cluster in the cloud for testing purposes.
 - [Terraform](https://www.terraform.io/downloads.html)
 - Ansible (install through your package manager or pip)
 - A DigitalOcean account ([referral link for free credit](https://m.do.co/c/79ec1acd556c))
-- Python (tested on 3.7 and 2.7, but will likely work in pretty much all versions)
+- Python (tested on 3.7 and 2.7, but will likely work in all versions that Ansible supports)
 
 ## Usage
 
