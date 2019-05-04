@@ -1,0 +1,68 @@
+- hosts: all
+
+  tasks:
+    - name: "download and extract Splunk"
+      unarchive:
+        src: "{{ splunk_download }}"
+        dest: "/opt"
+        remote_src: yes
+        mode: 0755
+      tags:
+        - icm
+        - idx
+
+    - block:
+        - name: "template out system/local conf files"
+          template:
+            src: "files/icm/{{ item }}"
+            dest: "/opt/splunk/etc/system/local/{{ item }}"
+            mode: 0644
+          loop:
+            - inputs.conf
+            - server.conf
+            - user-seed.conf
+
+        - name: "copy master-apps conf files"
+          copy:
+            src: "files/icm/master-apps/_cluster/local/indexes.conf"
+            dest: "/opt/splunk/etc/master-apps/_cluster/local/indexes.conf"
+            mode: 0644
+      tags: icm
+
+    - block:
+        - name: "copy system/local conf files"
+          copy:
+            src: "files/idx/web.conf"
+            dest: "/opt/splunk/etc/system/local/web.conf"
+            mode: 0644
+
+        - name: "template out system/local conf files"
+          template:
+            src: "files/idx/{{ item }}"
+            dest: "/opt/splunk/etc/system/local/{{ item }}"
+            mode: 0644
+          loop:
+            - inputs.conf
+            - server.conf
+            - user-seed.conf
+      tags: idx
+
+    - name: "open firewall ports"
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+      loop:
+        - 8000
+        - 8080
+        - 8089
+        - 8191
+        - 9997
+      tags:
+        - icm
+        - idx
+
+    - name: "start Splunk"
+      command: "/opt/splunk/bin/splunk start --accept-license --answer-yes --no-prompt"
+      tags:
+        - icm
+        - idx
