@@ -2,6 +2,10 @@ provider "digitalocean" {
   token = "${var.do_token}"
 }
 
+data "http" "client_ip" {
+  url = "https://ifconfig.co"
+}
+
 resource "digitalocean_ssh_key" "default" {
   name = "${var.prefix}-key"
   public_key = "${file(pathexpand(var.ssh_key_path))}"
@@ -39,5 +43,107 @@ resource "digitalocean_droplet" "idx" {
   tags = ["${digitalocean_tag.idx.id}"]
   provisioner "local-exec" {
     command = "sleep 30; ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u root -i '${self.ipv4_address},' -e 'ansible_python_interpreter=/usr/bin/python3' -e 'prefix=${var.prefix}' -e sites_string=$(python sites_string.py idx ${var.num_indexers} ${var.num_sites} ${count.index + 1}) -e 'splunk_password=${var.splunk_password}' -e 'idx_num=${count.index + 1}' -e 'icm_ip=${digitalocean_droplet.icm.ipv4_address_private}' -e 'splunk_download=${var.splunk_download}' master.yml -t idx"
+  }
+}
+
+resource "digitalocean_firewall" "icm" {
+  name = "${var.prefix}-icm"
+  tags = ["${digitalocean_tag.icm.name}"]
+  inbound_rule {
+      protocol = "icmp"
+      source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+  inbound_rule {
+    protocol = "tcp"
+    port_range = "22"
+    source_addresses = ["${chomp(data.http.client_ip.body)}/32"]
+    # source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+  inbound_rule {
+    protocol = "tcp"
+    port_range = "8000"
+    source_addresses = ["${chomp(data.http.client_ip.body)}/32"]
+  }
+  inbound_rule {
+    protocol = "tcp"
+    port_range = "8080"
+    source_tags = ["${digitalocean_tag.idx.name}"]
+  }
+  inbound_rule {
+    protocol = "tcp"
+    port_range = "8089"
+    source_tags = ["${digitalocean_tag.idx.name}"]
+  }
+  inbound_rule {
+    protocol = "tcp"
+    port_range = "8191"
+    source_tags = ["${digitalocean_tag.idx.name}"]
+  }
+  inbound_rule {
+    protocol = "tcp"
+    port_range = "9997"
+    source_tags = ["${digitalocean_tag.idx.name}"]
+  }
+  outbound_rule {
+    protocol = "tcp"
+    port_range = "1-65535"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+  outbound_rule {
+    protocol = "udp"
+    port_range = "1-65535"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+  outbound_rule {
+    protocol = "icmp"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+}
+
+resource "digitalocean_firewall" "idx" {
+  name = "${var.prefix}-idx"
+  tags = ["${digitalocean_tag.idx.name}"]
+  inbound_rule {
+      protocol = "icmp"
+      source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+  inbound_rule {
+    protocol = "tcp"
+    port_range = "22"
+    source_addresses = ["${chomp(data.http.client_ip.body)}/32"]
+  }
+  inbound_rule {
+    protocol = "tcp"
+    port_range = "8080"
+    source_tags = ["${digitalocean_tag.idx.name}", "${digitalocean_tag.icm.name}"]
+  }
+  inbound_rule {
+    protocol = "tcp"
+    port_range = "8089"
+    source_tags = ["${digitalocean_tag.idx.name}", "${digitalocean_tag.icm.name}"]
+  }
+  inbound_rule {
+    protocol = "tcp"
+    port_range = "8191"
+    source_tags = ["${digitalocean_tag.idx.name}", "${digitalocean_tag.icm.name}"]
+  }
+  inbound_rule {
+    protocol = "tcp"
+    port_range = "9997"
+    source_tags = ["${digitalocean_tag.idx.name}", "${digitalocean_tag.icm.name}"]
+  }
+  outbound_rule {
+    protocol = "tcp"
+    port_range = "1-65535"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+  outbound_rule {
+    protocol = "udp"
+    port_range = "1-65535"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+  outbound_rule {
+    protocol = "icmp"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
   }
 }
