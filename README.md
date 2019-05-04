@@ -1,4 +1,4 @@
-# ⛰ terraform-splunk
+# ⛰ terraform-splunk [![Build Status](https://travis-ci.com/Phuurl/terraform-splunk.svg?branch=master)](https://travis-ci.com/Phuurl/terraform-splunk)
 
 A Terraform plan to set up a Splunk cluster in the cloud for testing purposes.
 
