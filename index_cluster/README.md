@@ -8,3 +8,5 @@ This plan will by default create:
 These instances will be created in the AMS3 DigitalOcean region, and will be 1 vCPU x 1GB droplets.
 
 This and more can be configured by overriding the variables in [vars.tf](./vars.tf) - either as environment variables, or by placing them in `terraform.tfvars`.
+
+You can also deploy Splunk apps automatically to all spawned indexers by placing the archive (`.tar`, `.tgz`, `.tar.gz`, or `.spl`) for the individual apps in `files/icm/master-apps/`.
