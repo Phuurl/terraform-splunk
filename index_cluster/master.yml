@@ -27,6 +27,23 @@
             src: "files/icm/master-apps/_cluster/local/indexes.conf"
             dest: "/opt/splunk/etc/master-apps/_cluster/local/indexes.conf"
             mode: 0644
+
+        - name: "check for local Splunk apps"
+          find:
+            paths: "files/icm/master-apps"
+            patterns: "*.*,*.tar,*.tgz,*.spl"
+            depth: 1
+          delegate_to: localhost
+          register: local_splunk_apps
+
+        - name: "ship local apps to the ICM"
+          unarchive:
+            # src: "files/icm/master-apps/{{ item }}"
+            src: "{{ item.path }}"
+            dest: "/opt/splunk/etc/master-apps/"
+            mode: 0755
+          loop: "{{ local_splunk_apps.files }}"
+          when: local_splunk_apps.matched > 0
       tags: icm
 
     - block:
