@@ -18,4 +18,4 @@
 icm_host
 
 # Local Splunk app packages
-index_cluster/files/icm/master-apps/*.*
+index_cluster/ansible/files/icm/master-apps/*.*

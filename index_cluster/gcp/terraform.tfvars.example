@@ -1,0 +1,3 @@
+gcp_project = "project123"
+gcp_ssh_user = "user"
+splunk_password = "changed123"
