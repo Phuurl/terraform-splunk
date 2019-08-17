@@ -8,14 +8,17 @@ env:
 
 install:
   - pip3 install ansible ansible-lint pycodestyle
-  - wget 'https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip' -O terraform.zip
+  - wget 'https://releases.hashicorp.com/terraform/0.12.6/terraform_0.12.6_linux_amd64.zip' -O terraform.zip
   - unzip terraform.zip
   - chmod +x ./terraform
   - ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ""
 
 script:
-  # index_cluster tests
   - cd index_cluster/digitalocean
+  - cp terraform.tfvars.example terraform.tfvars
+  - ../../terraform init
+  - ../../terraform validate
+  - cd ../gcp
   - cp terraform.tfvars.example terraform.tfvars
   - ../../terraform init
   - ../../terraform validate
